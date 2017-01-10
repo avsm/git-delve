@@ -1,0 +1,22 @@
+opam-version: "1.2"
+maintainer: "Anil Madhavapeddy <anil@recoil.org>"
+authors: ["Anil Madhavapeddy <anil@recoil.org>"]
+homepage: "https://github.com/avsm/git-delve"
+doc: "http://anil.recoil.org/git-delve/doc"
+license: "ISC"
+dev-repo: "https://github.com/avsm/git-delve.git"
+bug-reports: "https://github.com/avsm/git-delve/issues"
+tags: ["org:mirage" "org:ocamllabs"]
+available: [ ocaml-version >= "4.03.0"]
+depends: [
+  "ocamlfind" {build}
+  "ocamlbuild" {build}
+  "topkg" {build} 
+  "astring"
+  "cmdliner"
+  "fmt"
+  "irmin"
+  "logs"
+]
+depopts: []
+build: [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned%}" ]

@@ -1,0 +1,11 @@
+PKG bytes
+PKG irmin
+PKG irmin.unix
+PKG astring
+PKG cmdliner
+PKG fmt
+PKG logs
+S src
+S src-bin
+S test
+B _build/**

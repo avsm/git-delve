@@ -1,0 +1,7 @@
+description = "Delve into Git repositories to generate statistics"
+version = "%%VERSION%%"
+requires = "irmin.unix fmt logs astring"
+archive(byte) = "git-delve.cma"
+archive(native) = "git-delve.cmxa"
+plugin(byte) = "git-delve.cma"
+plugin(native) = "git-delve.cmxs"
