@@ -4,7 +4,8 @@
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-val count_repo : string -> unit Lwt.t
+val count_repo : string -> (string * string * int) list Lwt.t
+val repo_commits : string -> (string * string * int64) list Lwt.t
 
 (*---------------------------------------------------------------------------
    Copyright (c) 2017 Anil Madhavapeddy

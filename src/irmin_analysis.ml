@@ -30,25 +30,37 @@ let count_lines_in_store t =
     lines := !lines + (num_lines v)
   ) >>= fun () ->
   Lwt.return !lines
-    
-let count_repo root =
+
+let map_repo fn root =
   let open Irmin_unix in
   Irmin_git.config ~root ~bare:false () |> fun config ->
   Store.Repo.create config >>= fun cfg ->
   Store.of_branch_id task "master" cfg >>= fun t ->
   Store.history (t "history") >>= fun history ->
   let commits = Topological.fold (fun b acc -> b :: acc) history [] in
-  Lwt_list.iter_s (fun c ->
-    let hash = Irmin.Hash.SHA1.to_hum c in
+  Lwt_list.map_s (fun commit ->
     let repo = Store.repo (t "repo") in
-    Store.Repo.task_of_commit_id repo c >>= fun task ->
-    Store.of_commit_id Irmin.Task.none c repo >>= fun store ->
-    let owner = Irmin.Task.owner task in
-    count_lines_in_store (store ()) >>= fun lines ->
-    Printf.printf "%s %s \"%s\" %d\n%!" root hash owner lines;
-    Lwt.return_unit
+    Store.Repo.task_of_commit_id repo commit >>= fun task ->
+    Store.of_commit_id Irmin.Task.none commit repo >>= fun store ->
+    fn store task commit
   ) commits
 
+let count_repo =
+  map_repo (fun store task commit ->
+    let hash = Irmin.Hash.SHA1.to_hum commit in
+    count_lines_in_store (store ()) >|= fun lines ->
+    let owner = Irmin.Task.owner task in
+    (hash,owner,lines)
+  ) 
+
+let repo_commits =
+  map_repo (fun store task commit ->
+    let owner = Irmin.Task.owner task in
+    let date = Irmin.Task.date task in
+    let hash = Irmin.Hash.SHA1.to_hum commit in
+    Lwt.return (hash,owner,date)
+  ) 
+ 
 (*---------------------------------------------------------------------------
    Copyright (c) 2017 Anil Madhavapeddy
 

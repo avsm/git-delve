@@ -16,6 +16,7 @@ depends: [
   "cmdliner"
   "fmt"
   "irmin"
+  "irmin-unix"
   "logs"
 ]
 depopts: []
