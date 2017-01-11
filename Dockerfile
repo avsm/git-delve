@@ -9,12 +9,12 @@ COPY scripts/clone.sh /home/opam/clone.sh
 RUN sudo chmod a+x /home/opam/clone.sh
 RUN /home/opam/clone.sh
 RUN git clone git://github.com/avsm/git-delve.git /home/opam/src
-RUN cd /home/opam/src && git pull origin master && git checkout efbfc263559de3e3565929d7c960d2e1f2fbbb91
+RUN cd /home/opam/src && git pull origin master && git checkout d131bab298b38dd4bb89eb616efe254eebed783b
 RUN opam pin add -y git-delve /home/opam/src
 RUN opam config exec -- git-delve -d _repos > /home/opam/src/scripts/scan.txt
 RUN opam config exec -- git-delve -d _repos commit > /home/opam/src/scripts/commits.txt
 RUN opam config exec -- git-delve -d _repos contrib > /home/opam/src/scripts/contribs.txt
-#RUN opam config exec -- git-delve -d _repos loc > /home/opam/src/scripts/loc.txt
+RUN opam config exec -- git-delve -d _repos loc > /home/opam/src/scripts/loc.txt
 WORKDIR /home/opam/src/scripts
 RUN python ./plot-commits.py
 rUN python ./plot-contribs.py
