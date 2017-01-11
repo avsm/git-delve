@@ -1,6 +1,6 @@
 #!/bin/sh -e
 
-DIR=/Volumes/ramdisk/_repos
+DIR=_repos
 mkdir -p ${DIR}
 for i in `cat repos.txt`; do
   devrepo=`opam show $i -f dev-repo`
