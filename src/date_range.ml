@@ -37,6 +37,12 @@ let incr_entry tm l =
   | None -> l
   | Some v -> replace_entry tm (v+1) l
 
+let cumulative_time fn init l =
+  let l = List.sort (fun (a,_) (b,_) -> Ptime.compare a b) l in
+  List.fold_left (fun (sum,acc) (tm,b) ->
+   let sum = fn sum b in 
+   sum, ((tm,sum)::acc)) (init,[]) l |> snd |> List.rev
+
 module NearestTime = struct
   include Map.Make(Ptime)
   let find_last_updated k m =

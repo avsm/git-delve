@@ -18,6 +18,10 @@ val repo_commits :
   string ->
   (string * string * Ptime.t) list Lwt.t
 
+val repo_contribs_for_range :
+  start_year:int -> start_month:int -> end_year:int -> end_month:int ->
+  string -> (Ptime.t * string list) list Lwt.t
+
 val combine :
   ('a -> 'b -> 'a) -> 'a ->
   (string * 'b) list ->

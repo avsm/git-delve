@@ -87,15 +87,25 @@ let repo_loc_for_range ~start_year ~start_month ~end_year ~end_month root =
     with Not_found -> d,0
   ) range
 
-let repo_commits =
+let owners = Hashtbl.create 1
+let repo_commits repo =
   map_repo (fun store task commit ->
-    let owner = Irmin.Task.owner task in
+    let owner =
+      match Irmin.Task.owner task with
+      | "" -> "Unknown"
+      | x -> x in
+    let _ =
+      if not (Hashtbl.mem owners owner) then begin
+        Hashtbl.add owners owner ();
+        prerr_endline ("NEW contributor: " ^ owner)
+      end
+    in
     let date =
       Irmin.Task.date task |> Int64.to_float |> Ptime.of_float_s
       |> function None -> failwith "invalid commit date" | Some d -> d in
     let hash = Irmin.Hash.SHA1.to_hum commit in
     Lwt.return (hash,owner,date)
-  ) 
+  ) repo
 
 let repo_commits_for_range ~start_year ~start_month ~end_year ~end_month root =
   Printf.eprintf "Processing: %s\n%!" root;
@@ -105,6 +115,21 @@ let repo_commits_for_range ~start_year ~start_month ~end_year ~end_month root =
   let x = List.fold_left (fun acc (hash, owner, date) ->
     Date_range.incr_entry date acc
   ) r commits in 
+  Lwt.return x
+
+let repo_contribs_for_range ~start_year ~start_month ~end_year ~end_month root =
+  Printf.eprintf "Processing: %s\n%!" root;
+  repo_commits root >>= fun commits ->
+  let range = Date_range.t ~start_year ~start_month ~end_year ~end_month in
+  let r = List.map (fun t -> t, []) range in
+  let x = List.fold_left (fun acc (hash, owner, date) ->
+    Date_range.find_entry date acc |>
+    function
+    | None -> Date_range.replace_entry date [owner] acc
+    | Some owners ->
+       let owners = if List.mem owner owners then owners else owner::owners in
+       Date_range.replace_entry date owners acc
+  ) r commits in
   Lwt.return x
 
 (* Given a list of repo / something pairs, combine the stats *)

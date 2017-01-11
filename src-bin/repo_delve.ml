@@ -14,14 +14,18 @@ let with_range fn v =
   let end_year = 2016 in
   fn ~start_year ~start_month ~end_year ~end_month v
 
-let main dir =
-  with_range Irmin_analysis.repo_loc_for_range dir
-
-let commits dir =
-  with_range Irmin_analysis.repo_commits_for_range dir
+let main = with_range Irmin_analysis.repo_loc_for_range
+let commits = with_range Irmin_analysis.repo_commits_for_range
+let contribs = with_range Irmin_analysis.repo_contribs_for_range
 
 let ptime_to_ts tm = Fmt.strf "%Ld" (Ptime.to_float_s tm |> Int64.of_float)
 
+let merge_without_dup l1 l2 =
+  List.fold_left (fun a b ->
+    match List.mem b a with
+    | true -> a  | false -> b::a
+  ) l1 l2
+    
 let run_lwt git_dir mode () =
   (* Determine which repositories to clone *)
   Unix.chdir git_dir;
@@ -46,7 +50,7 @@ let run_lwt git_dir mode () =
             Printf.printf "%s %s %d\n%!" repo (ptime_to_ts tm) loc) tms
         ) r;
         Lwt.return_unit
-    | `Commits ->
+    | `Commit ->
         Lwt_list.map_s (fun dir -> commits dir >|= fun r -> dir, r) dirs >>= fun l ->
         let r = Irmin_analysis.combine_with_times (fun acc loc -> acc+loc) 0 l in
         List.iter (fun (repo, tms) ->
@@ -54,7 +58,19 @@ let run_lwt git_dir mode () =
             Printf.printf "%s %s %d\n%!" repo (ptime_to_ts tm) loc) tms
         ) r;
         Lwt.return_unit
- 
+    | `Contrib ->
+        Lwt_list.map_s (fun dir -> contribs dir >|= fun r -> dir, r) dirs >>= fun l ->
+        let r = Irmin_analysis.combine_with_times (fun acc cbs ->
+          merge_without_dup acc cbs) [] l in
+        let r = List.map (fun (r,tms) ->
+          let n = Date_range.cumulative_time merge_without_dup [] tms in
+          let n2 = List.map (fun (tm,b) -> tm, (List.length b)) n in
+          r, n2) r in
+        List.iter (fun (repo, tms) ->
+          List.iter (fun (tm, loc) ->
+            Printf.printf "%s %s %d\n%!" repo (ptime_to_ts tm) loc) tms
+        ) r;
+        Lwt.return_unit
   in
   Lwt_main.run t
 
@@ -74,7 +90,7 @@ let git_dir =
 
 let mode =
   let doc = "Which analysis to run" in
-  let choices = ["scan",`Scan; "loc",`Loc; "commits", `Commits] in
+  let choices = ["scan",`Scan; "loc",`Loc; "commit", `Commit; "contrib", `Contrib] in
   Arg.(value & pos 0 (enum choices) `Scan & info [] ~docv:"MODE" ~doc)
 
 let main () =
