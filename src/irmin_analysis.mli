@@ -5,9 +5,18 @@
   ---------------------------------------------------------------------------*)
 
 val count_repo_loc : string -> int Date_range.NearestTime.t Lwt.t
+
 val repo_loc_for_range : start_year:int -> start_month:int -> end_year:int -> end_month:int -> string -> (Ptime.t * int) list Lwt.t
 
 val repo_commits : string -> (string * string * int64) list Lwt.t
+
+val combine : ('a -> 'b -> 'a) -> 'a -> (string * 'b) list -> (string * 'a) list
+
+val combine_with_times :
+  ('a -> 'b -> 'a) ->
+  'a ->
+  (string * (Ptime.t * 'b) list) list -> (string * (Ptime.t * 'a) list) list
+
 
 (*---------------------------------------------------------------------------
    Copyright (c) 2017 Anil Madhavapeddy

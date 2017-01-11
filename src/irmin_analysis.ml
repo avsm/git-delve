@@ -94,7 +94,30 @@ let repo_commits =
     let hash = Irmin.Hash.SHA1.to_hum commit in
     Lwt.return (hash,owner,date)
   ) 
- 
+
+(* Given a list of repo / something pairs, combine the stats *)
+let combine fn acc l =
+  let h = Hashtbl.create 100 in
+  List.iter (fun (repo, v) ->
+    let repo = Classify_repo.t repo in
+    match Hashtbl.find h repo with
+    | acc -> Hashtbl.replace h repo (fn acc v)
+    | exception Not_found -> Hashtbl.add h repo (fn acc v)
+  ) l;
+  Hashtbl.fold (fun k v acc -> (k,v)::acc) h []
+
+let combine_with_times fn init_val l =
+  let acc = 
+    match l with
+    |(_,tms)::_ -> List.map (fun (t,_) -> t,init_val) tms
+    |[] -> [] in
+  combine (
+    List.map2 (fun (tm,v) (tm',v') ->
+      if tm <> tm' then failwith "times not sorted";
+      tm, (fn v v')
+    )
+  ) acc l
+
 (*---------------------------------------------------------------------------
    Copyright (c) 2017 Anil Madhavapeddy
 

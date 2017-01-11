@@ -19,6 +19,7 @@ depends: [
   "irmin-unix"
   "logs"
   "ptime"
+  "fpath"
 ]
 depopts: []
 build: [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%" ]

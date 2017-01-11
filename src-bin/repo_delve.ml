@@ -12,21 +12,36 @@ let main dir =
   let start_year = 2013 in
   let end_month = 1 in
   let end_year = 2017 in
-  Irmin_analysis.repo_loc_for_range ~start_month ~start_year ~end_month ~end_year dir >|=
-  List.iter (fun (tm,loc) ->
-    Printf.printf "%s %s %d\n%!" dir (Fmt.strf "%Ld" (Ptime.to_float_s tm |> Int64.of_float)) loc
-  )
+  Irmin_analysis.repo_loc_for_range ~start_month ~start_year ~end_month ~end_year dir
 
-let run_lwt git_dir () =
+let ptime_to_ts tm = Fmt.strf "%Ld" (Ptime.to_float_s tm |> Int64.of_float)
+
+let run_lwt git_dir mode () =
   (* Determine which repositories to clone *)
   Unix.chdir git_dir;
-  Lwt_unix.files_of_directory "." |>
-  Lwt_stream.iter_s (fun dir ->
-    match dir with
-    | "." | ".." -> Lwt.return_unit
-    | dir when Sys.is_directory dir -> main dir
-    | _ -> Lwt.return_unit) |>
-  Lwt_main.run
+  let t =
+    let st = Lwt_unix.files_of_directory "." in
+    let st = Lwt_stream.filter_s (fun dir ->
+      match dir with
+      | "." | ".." -> Lwt.return_false
+      | dir when Sys.is_directory dir -> Lwt.return_true
+      | _ -> Lwt.return_false
+    ) st in
+    Lwt_stream.to_list st >>= fun dirs ->
+    match mode with
+    | `Scan ->
+        List.iter (fun dir -> Printf.printf "%s -> %s\n%!" dir (Classify_repo.t dir)) dirs;
+        Lwt.return_unit
+    | `Loc ->
+        Lwt_list.map_s (fun dir -> main dir >|= fun r -> dir, r) dirs >>= fun l ->
+        let r = Irmin_analysis.combine_with_times (fun acc loc -> acc+loc) 0 l in
+        List.iter (fun (repo, tms) ->
+          List.iter (fun (tm, loc) ->
+            Printf.printf "%s %s %d\n%!" repo (ptime_to_ts tm) loc) tms
+        ) r;
+        Lwt.return_unit
+  in
+  Lwt_main.run t
 
 let setup_log style_renderer level =
   Fmt_tty.setup_std_outputs ?style_renderer ();
@@ -42,8 +57,13 @@ let git_dir =
   let doc = "Directory with Git checkouts" in
   Arg.(required & opt (some dir) None & info ["d"; "repo-directory"] ~docv:"REPO_DIRECTORY" ~doc)
 
+let mode =
+  let doc = "Which analysis to run" in
+  let choices = ["scan",`Scan; "loc",`Loc] in
+  Arg.(value & pos 0 (enum choices) `Scan & info [] ~docv:"MODE" ~doc)
+
 let main () =
-  match Term.(eval (const run_lwt $ git_dir $ setup_log, Term.info "irmin-code-scry")) with
+  match Term.(eval (const run_lwt $ git_dir $ mode $ setup_log, Term.info "irmin-code-scry")) with
   | `Error _ -> exit 1
   | _ -> exit (if Logs.err_count () > 0 then 1 else 0)
 
