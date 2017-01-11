@@ -4,7 +4,9 @@
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-val count_repo : string -> (string * string * int) list Lwt.t
+val count_repo_loc : string -> int Date_range.NearestTime.t Lwt.t
+val repo_loc_for_range : start_year:int -> start_month:int -> end_year:int -> end_month:int -> string -> (Ptime.t * int) list Lwt.t
+
 val repo_commits : string -> (string * string * int64) list Lwt.t
 
 (*---------------------------------------------------------------------------

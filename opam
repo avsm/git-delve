@@ -18,6 +18,7 @@ depends: [
   "irmin"
   "irmin-unix"
   "logs"
+  "ptime"
 ]
 depopts: []
-build: [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned%}" ]
+build: [ "ocaml" "pkg/pkg.ml" "build" "--pinned" "%{pinned}%" ]

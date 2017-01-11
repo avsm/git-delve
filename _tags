@@ -1,5 +1,5 @@
 true : annot, bin_annot, safe_string, package(bytes)
-true: package(irmin.unix), package(cmdliner), package(fmt.tty), package(logs.fmt), package(fmt.cli), package(logs.cli), package(astring)
+true: package(irmin.unix), package(cmdliner), package(fmt.tty), package(logs.fmt), package(fmt.cli), package(logs.cli), package(astring), package(ptime)
 <src> : include
 <test> : include
 <_repos>: -traverse

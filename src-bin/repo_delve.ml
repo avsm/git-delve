@@ -8,9 +8,14 @@ open Lwt.Infix
 open Astring
 
 let main dir =
-  Irmin_analysis.repo_commits dir >|=
-  List.iter (fun (hash, owner, date) ->
-    Printf.printf "%s %s %S %Lu\n%!" dir hash owner date
+  let start_month = 1 in
+  let start_year = 2013 in
+  let end_month = 1 in
+  let end_year = 2017 in
+  Irmin_analysis.repo_loc_for_range ~start_month ~start_year ~end_month ~end_year dir >|=
+  List.iter (fun (tm,loc) ->
+    Printf.printf "%s %s %d\n%!" dir (Fmt.strf "%Ld" (Ptime.to_float_s tm |> Int64.of_float)) loc
+  )
 
 let run_lwt git_dir () =
   (* Determine which repositories to clone *)
@@ -43,7 +48,6 @@ let main () =
   | _ -> exit (if Logs.err_count () > 0 then 1 else 0)
 
 let () = main ()
-
 (*---------------------------------------------------------------------------
    Copyright (c) 2017 Anil Madhavapeddy
 
