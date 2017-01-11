@@ -7,12 +7,18 @@
 open Lwt.Infix
 open Astring
 
-let main dir =
+let with_range fn v =
   let start_month = 1 in
   let start_year = 2013 in
-  let end_month = 1 in
-  let end_year = 2017 in
-  Irmin_analysis.repo_loc_for_range ~start_month ~start_year ~end_month ~end_year dir
+  let end_month = 12 in
+  let end_year = 2016 in
+  fn ~start_year ~start_month ~end_year ~end_month v
+
+let main dir =
+  with_range Irmin_analysis.repo_loc_for_range dir
+
+let commits dir =
+  with_range Irmin_analysis.repo_commits_for_range dir
 
 let ptime_to_ts tm = Fmt.strf "%Ld" (Ptime.to_float_s tm |> Int64.of_float)
 
@@ -40,6 +46,15 @@ let run_lwt git_dir mode () =
             Printf.printf "%s %s %d\n%!" repo (ptime_to_ts tm) loc) tms
         ) r;
         Lwt.return_unit
+    | `Commits ->
+        Lwt_list.map_s (fun dir -> commits dir >|= fun r -> dir, r) dirs >>= fun l ->
+        let r = Irmin_analysis.combine_with_times (fun acc loc -> acc+loc) 0 l in
+        List.iter (fun (repo, tms) ->
+          List.iter (fun (tm, loc) ->
+            Printf.printf "%s %s %d\n%!" repo (ptime_to_ts tm) loc) tms
+        ) r;
+        Lwt.return_unit
+ 
   in
   Lwt_main.run t
 
@@ -59,7 +74,7 @@ let git_dir =
 
 let mode =
   let doc = "Which analysis to run" in
-  let choices = ["scan",`Scan; "loc",`Loc] in
+  let choices = ["scan",`Scan; "loc",`Loc; "commits", `Commits] in
   Arg.(value & pos 0 (enum choices) `Scan & info [] ~docv:"MODE" ~doc)
 
 let main () =

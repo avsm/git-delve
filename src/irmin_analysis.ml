@@ -42,8 +42,8 @@ let map_repo fn root =
   Irmin_git.config ~root ~bare:false () |> fun config ->
   Store.Repo.create config >>= fun cfg ->
   Store.master task cfg >>= fun tt ->
-  let disk_store = Irmin.remote_store (module Store) (tt "remote") in
 (*
+  let disk_store = Irmin.remote_store (module Store) (tt "remote") in
   Mem_Store.Repo.create config >>= fun mem_cfg ->
   Mem_Store.master task mem_cfg >>= fun mem_tt ->
   let mem_store = Irmin.remote_store (module Mem_Store) (mem_tt "remote") in
@@ -90,10 +90,22 @@ let repo_loc_for_range ~start_year ~start_month ~end_year ~end_month root =
 let repo_commits =
   map_repo (fun store task commit ->
     let owner = Irmin.Task.owner task in
-    let date = Irmin.Task.date task in
+    let date =
+      Irmin.Task.date task |> Int64.to_float |> Ptime.of_float_s
+      |> function None -> failwith "invalid commit date" | Some d -> d in
     let hash = Irmin.Hash.SHA1.to_hum commit in
     Lwt.return (hash,owner,date)
   ) 
+
+let repo_commits_for_range ~start_year ~start_month ~end_year ~end_month root =
+  Printf.eprintf "Processing: %s\n%!" root;
+  repo_commits root >>= fun commits ->
+  let range = Date_range.t ~start_year ~start_month ~end_year ~end_month in
+  let r = List.map (fun t -> t, 0) range in
+  let x = List.fold_left (fun acc (hash, owner, date) ->
+    Date_range.incr_entry date acc
+  ) r commits in 
+  Lwt.return x
 
 (* Given a list of repo / something pairs, combine the stats *)
 let combine fn acc l =

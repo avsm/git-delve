@@ -6,6 +6,10 @@
 
 val t : start_year:int -> start_month:int -> end_year:int -> end_month:int -> Ptime.t list
 
+val find_entry : Ptime.t -> (Ptime.t * 'a) list -> 'a option
+val replace_entry : Ptime.t -> 'a -> (Ptime.t * 'a) list -> (Ptime.t * 'a) list
+val incr_entry : Ptime.t -> (Ptime.t * int) list -> (Ptime.t * int) list
+
 module NearestTime : sig
   include Map.S with type key = Ptime.t
   val find_last_updated : key -> 'a t -> key * 'a 

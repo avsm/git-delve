@@ -4,30 +4,46 @@
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
+let mk_date ~y ~m =
+  match Ptime.of_date (y,m,1) with
+  | None -> raise (Failure "invalid date")
+  | Some x -> x
+
 let t ~start_year ~start_month ~end_year ~end_month =
-  let mk ~y ~m =
-    match Ptime.of_date (y,m,1) with
-    | None -> raise (Failure "invalid date")
-    | Some x -> x
-  in
   let rec fn acc (y,m) =
     match (y,m) with
-    |y,m when y=start_year && m=start_month -> (mk ~y ~m :: acc) |> List.rev
-    |y,1 -> fn (mk ~y ~m :: acc) (y-1,12)
-    |y,m -> fn (mk ~y ~m :: acc) (y,m-1)
+    |y,m when y=start_year && m=start_month -> (mk_date ~y ~m :: acc) |> List.rev
+    |y,1 -> fn (mk_date ~y ~m :: acc) (y-1,12)
+    |y,m -> fn (mk_date ~y ~m :: acc) (y,m-1)
   in
   fn [] (end_year, end_month)
 
+let find_entry tm l =
+  let y,m,_ = Ptime.to_date tm in
+  let round_tm = mk_date ~y ~m in
+  match List.assoc round_tm l with
+  | exception Not_found -> None
+  | v -> Some v
+
+let replace_entry tm v l =
+  let y,m,_ = Ptime.to_date tm in
+  let round_tm = mk_date ~y ~m in
+  match List.mem_assoc round_tm l with
+  | false -> l
+  | true -> List.map (fun (tm,v') -> if tm = round_tm then tm, v else tm,v') l
+
+let incr_entry tm l =
+  find_entry tm l |> function
+  | None -> l
+  | Some v -> replace_entry tm (v+1) l
+
 module NearestTime = struct
   include Map.Make(Ptime)
-
   let find_last_updated k m =
     match split k m with
     | l, Some v, _ -> (k,v)
     | l, None, _ -> max_binding l
 end
- 
-
  
 (*---------------------------------------------------------------------------
    Copyright (c) 2017 Anil Madhavapeddy
