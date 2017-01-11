@@ -9,7 +9,7 @@ COPY scripts/clone.sh /home/opam/clone.sh
 RUN sudo chmod a+x /home/opam/clone.sh
 RUN /home/opam/clone.sh
 RUN git clone git://github.com/avsm/git-delve.git /home/opam/src
-RUN cd /home/opam/src && git pull origin master && git checkout 836587f4a26265c064cd9612eff3808075b5cd41
+RUN cd /home/opam/src && git pull origin master && git checkout f9e662a27bfbee725b14ba0be56cd855cc6fc5a2
 RUN opam pin add -y git-delve /home/opam/src
 RUN opam config exec -- git-delve -d _repos > /home/opam/src/scripts/scan.txt
 RUN opam config exec -- git-delve -d _repos commits > /home/opam/src/scripts/commits.txt

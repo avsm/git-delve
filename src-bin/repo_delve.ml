@@ -94,7 +94,7 @@ let mode =
   Arg.(value & pos 0 (enum choices) `Scan & info [] ~docv:"MODE" ~doc)
 
 let main () =
-  match Term.(eval (const run_lwt $ git_dir $ mode $ setup_log, Term.info "irmin-code-scry")) with
+  match Term.(eval (const run_lwt $ git_dir $ mode $ setup_log, Term.info "git-delve")) with
   | `Error _ -> exit 1
   | _ -> exit (if Logs.err_count () > 0 then 1 else 0)
 
