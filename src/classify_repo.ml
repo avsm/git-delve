@@ -108,6 +108,46 @@ let classify repo =
   |"ocaml-uri" -> Web
   |"ocaml-ctypes" -> Core
   |"ocaml-vhd" -> Storage
+  |"alcotest" -> Tool
+  |"angstrom" -> Protocol
+  |"ansi-parse" -> Protocol
+  |"arp" -> Protocol
+  |"astring" -> Core
+  |"charrua-client" -> Protocol
+  |"charrua-unix" -> Protocol
+  |"cmdliner" -> Core
+  |"cpuid" -> Tool
+  |"duration" -> Core
+  |"logs" -> Core
+  |"logs-syslog" -> Driver
+  |"lwt" -> Core
+  |"mirage-device" -> Core
+  |"mirage-flow" -> Core
+  |"mirage-kv" -> Core
+  |"mirage-logs" ->  Core
+  |"mirage-net" -> Protocol
+  |"mirage-protocols" -> Protocol
+  |"mirage-random" -> Core
+  |"mirage-stack" -> Protocol
+  |"mirage-time" -> Core
+  |"ocaml-anycache" -> Storage
+  |"ocaml-base64" -> Storage
+  |"ocaml-hex" -> Storage
+  |"ocaml-hkdf" -> Sec
+  |"ocaml-integers" -> Core
+  |"ocaml-irc-client" -> Protocol
+  |"ocaml-lru-cache" -> Storage
+  |"ocaml-magic-mime" -> Web
+  |"ocaml-otr" -> Sec
+  |"ocaml-session" -> Web
+  |"ocaml-webmachine" -> Web
+  |"ocaml-xenstore" -> Driver
+  |"ocb-stubblr" -> Tool
+  |"ocplib-endian" -> Core
+  |"opam-file-format" -> Tool
+  |"owl" -> Tool
+  |"vpnkit" -> Protocol
+  |"webbrowser" -> Web
   |x -> Unknown x
 
 let t x = classify x |> to_string
