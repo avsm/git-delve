@@ -14,7 +14,7 @@ RUN opam pin add -y git-delve /home/opam/src
 RUN opam config exec -- git-delve -d _repos > /home/opam/src/scripts/scan.txt
 RUN opam config exec -- git-delve -d _repos commit > /home/opam/src/scripts/commits.txt
 RUN opam config exec -- git-delve -d _repos contrib > /home/opam/src/scripts/contribs.txt
-RUN opam config exec -- git-delve -d _repos loc > /home/opam/src/scripts/loc.txt
+#RUN opam config exec -- git-delve -d _repos loc > /home/opam/src/scripts/loc.txt
 WORKDIR /home/opam/src/scripts
 RUN python ./plot-commits.py
 rUN python ./plot-contribs.py

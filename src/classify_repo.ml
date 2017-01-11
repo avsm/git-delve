@@ -50,6 +50,7 @@ let classify repo =
   |"mirage-entropy" -> Core
   |"ocaml-fat" -> Storage
   |"ocaml-xen-lowlevel-libs" -> Driver
+  |"mirage-net-solo5" -> Driver
   |"dyntype" -> Core
   |"mirage-fs" -> Storage
   |"ocaml-fd-send-recv" -> Driver
