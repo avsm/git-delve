@@ -25,12 +25,12 @@ val repo_contribs_for_range :
 val combine :
   ('a -> 'b -> 'a) -> 'a ->
   (string * 'b) list ->
-  (string * 'a) list
+  (Classify_repo.t * 'a) list
 
 val combine_with_times :
   ('a -> 'b -> 'a) -> 'a ->
   (string * (Ptime.t * 'b) list) list ->
-  (string * (Ptime.t * 'a) list) list
+  (Classify_repo.t * (Ptime.t * 'a) list) list
 
 
 (*---------------------------------------------------------------------------

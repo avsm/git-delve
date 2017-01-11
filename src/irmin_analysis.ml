@@ -123,8 +123,7 @@ let repo_contribs_for_range ~start_year ~start_month ~end_year ~end_month root =
   let range = Date_range.t ~start_year ~start_month ~end_year ~end_month in
   let r = List.map (fun t -> t, []) range in
   let x = List.fold_left (fun acc (hash, owner, date) ->
-    Date_range.find_entry date acc |>
-    function
+    Date_range.find_entry date acc |> function
     | None -> Date_range.replace_entry date [owner] acc
     | Some owners ->
        let owners = if List.mem owner owners then owners else owner::owners in

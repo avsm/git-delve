@@ -4,7 +4,21 @@
    %%NAME%% %%VERSION%%
   ---------------------------------------------------------------------------*)
 
-val t : string -> string
+type t =
+  | Driver
+  | Core
+  | Web
+  | Protocol
+  | Sec
+  | Tool
+  | Storage
+  | Unknown of string
+
+val t : string -> t
+
+val to_string : t -> string
+
+val compare : t -> t -> int
 
 (*---------------------------------------------------------------------------
    Copyright (c) 2017 Anil Madhavapeddy

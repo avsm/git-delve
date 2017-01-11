@@ -17,6 +17,16 @@ type t =
   | Storage
   | Unknown of string
 
+let to_int = function
+  | Core -> 1
+  | Driver -> 2
+  | Protocol -> 3
+  | Storage -> 4
+  | Sec -> 5
+  | Web -> 6
+  | Tool -> 7
+  | Unknown _ -> 8
+
 let to_string = function
   | Driver -> "driver"
   | Core -> "core"
@@ -151,7 +161,9 @@ let classify repo =
   |"webbrowser" -> Web
   |x -> Unknown x
 
-let t x = classify x |> to_string
+let t x = classify x
+
+let compare a b = compare (to_int a) (to_int b)
 
 (*---------------------------------------------------------------------------
    Copyright (c) 2017 Anil Madhavapeddy

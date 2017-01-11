@@ -40,14 +40,14 @@ let run_lwt git_dir mode () =
     Lwt_stream.to_list st >>= fun dirs ->
     match mode with
     | `Scan ->
-        List.iter (fun dir -> Printf.printf "%s -> %s\n%!" dir (Classify_repo.t dir)) dirs;
+        List.iter (fun dir -> Printf.printf "%s -> %s\n%!" dir (Classify_repo.(t dir |> to_string))) dirs;
         Lwt.return_unit
     | `Loc ->
         Lwt_list.map_s (fun dir -> main dir >|= fun r -> dir, r) dirs >>= fun l ->
         let r = Irmin_analysis.combine_with_times (fun acc loc -> acc+loc) 0 l in
         List.iter (fun (repo, tms) ->
           List.iter (fun (tm, loc) ->
-            Printf.printf "%s %s %d\n%!" repo (ptime_to_ts tm) loc) tms
+            Printf.printf "%s %s %d\n%!" (Classify_repo.to_string repo) (ptime_to_ts tm) loc) tms
         ) r;
         Lwt.return_unit
     | `Commit ->
@@ -55,20 +55,40 @@ let run_lwt git_dir mode () =
         let r = Irmin_analysis.combine_with_times (fun acc loc -> acc+loc) 0 l in
         List.iter (fun (repo, tms) ->
           List.iter (fun (tm, loc) ->
-            Printf.printf "%s %s %d\n%!" repo (ptime_to_ts tm) loc) tms
+            Printf.printf "%s %s %d\n%!" (Classify_repo.to_string repo) (ptime_to_ts tm) loc) tms
         ) r;
         Lwt.return_unit
     | `Contrib ->
         Lwt_list.map_s (fun dir -> contribs dir >|= fun r -> dir, r) dirs >>= fun l ->
-        let r = Irmin_analysis.combine_with_times (fun acc cbs ->
-          merge_without_dup acc cbs) [] l in
+        let r = Irmin_analysis.combine_with_times merge_without_dup [] l in
+        let repos = List.fold_left (fun a (b,_) -> b::a) [] r |> List.sort Classify_repo.compare in
+        let dates = List.hd r |> snd |> List.map fst in
+        let seen_authors = List.map (fun _ -> Hashtbl.create 1) dates in
+        let r =
+          List.map (fun repo ->
+            let t =
+              List.mapi (fun i tm ->
+                let seen = List.nth seen_authors i in
+                let authors = List.assoc repo r |> List.assoc tm in
+                let authors =
+                  List.filter (fun author ->
+                    if Hashtbl.mem seen author then false
+                    else begin
+                      Printf.eprintf "%s %s -> %s\n%!" (Fmt.strf "%a" Ptime.pp tm) (Classify_repo.to_string repo) author;
+                      Hashtbl.add seen author (); true
+                    end
+                  ) authors in
+                tm, authors
+              ) dates in
+            repo, t
+          ) repos in
         let r = List.map (fun (r,tms) ->
           let n = Date_range.cumulative_time merge_without_dup [] tms in
           let n2 = List.map (fun (tm,b) -> tm, (List.length b)) n in
           r, n2) r in
         List.iter (fun (repo, tms) ->
           List.iter (fun (tm, loc) ->
-            Printf.printf "%s %s %d\n%!" repo (ptime_to_ts tm) loc) tms
+            Printf.printf "%s %s %d\n%!" (Classify_repo.to_string repo) (ptime_to_ts tm) loc) tms
         ) r;
         Lwt.return_unit
   in
