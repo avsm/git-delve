@@ -17,5 +17,5 @@ RUN opam config exec -- git-delve -d _repos contrib > /home/opam/src/scripts/con
 RUN opam config exec -- git-delve -d _repos loc > /home/opam/src/scripts/loc.txt
 WORKDIR /home/opam/src/scripts
 RUN python ./plot-commits.py
-rUN python ./plot-contribs.py
-rUN python ./plot-commits.py
+RUN python ./plot-contribs.py
+RUN python ./plot-loc.py
