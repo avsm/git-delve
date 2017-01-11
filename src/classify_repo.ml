@@ -25,7 +25,7 @@ let to_string = function
   | Sec -> "security"
   | Tool -> "tool"
   | Storage -> "storage"
-  | Unknown x -> "unknown:x"
+  | Unknown x -> "unknown:" ^ x
 
 let classify repo =
   (* Strip any extension *)
