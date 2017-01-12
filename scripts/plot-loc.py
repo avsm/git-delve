@@ -29,7 +29,11 @@ for key,value in repos.iteritems():
 
 plt.stackplot(X, *Y, baseline="zero", labels=labels)
 plt.title("MirageOS 3 lines of code")
-plt.legend(loc=(0.25,0.4))
+plt.legend(loc=(0.05,0.55))
+plt.annotate('v1.0 released', fontsize='x-small', xy=(0.25, 0.4), xycoords='axes fraction', textcoords='axes fraction', xytext=(0.05, 0.50),
+            arrowprops=dict(facecolor='black', shrink=0.05, width=0.5, headwidth=8))
+plt.annotate('v2.0 released', fontsize='x-small', xy=(0.43, 0.71), xycoords='axes fraction', textcoords='axes fraction', xytext=(0.35, 0.85),
+            arrowprops=dict(facecolor='black', shrink=0.05, width=0.5, headwidth=8))
 plt.xticks(X, Xyear, rotation='vertical', fontsize='small')
 plt.tight_layout()
 plt.savefig("loc.pdf", format="pdf")

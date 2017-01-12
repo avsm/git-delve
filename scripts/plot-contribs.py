@@ -29,7 +29,7 @@ for key,value in repos.iteritems():
 
 plt.stackplot(X, *Y, baseline="zero", labels=labels)
 plt.title("MirageOS 3 number of contributors")
-plt.legend(loc=(0.10,0.4))
+plt.legend(loc=(0.05,0.55))
 plt.xticks(X, Xyear, rotation='vertical', fontsize='small')
 plt.tight_layout()
 plt.savefig("contribs.pdf", format="pdf")
