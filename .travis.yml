@@ -5,4 +5,4 @@ script:
 services:
 - docker
 before_install:
-- openssl aes-256-cbc -K $encrypted_b5c324371014_key -iv $encrypted_b5c324371014_iv -in .deploy_git_delve.enc -out deploy_git_delve -d
+- openssl aes-256-cbc -K $encrypted_b5c324371014_key -iv $encrypted_b5c324371014_iv -in .deploy_git_env.enc -out deploy_git_delve -d
