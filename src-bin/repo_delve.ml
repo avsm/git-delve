@@ -42,6 +42,15 @@ let run_lwt git_dir mode () =
     | `Scan ->
         List.iter (fun dir -> Printf.printf "%s -> %s\n%!" dir (Classify_repo.(t dir |> to_string))) dirs;
         Lwt.return_unit
+    | `Files ->
+        let h = Hashtbl.create 10 in
+        Lwt_list.map_s Irmin_analysis.repo_filenames dirs >|= fun lines ->
+        List.iter (Hashtbl.iter (fun k i ->
+          match Hashtbl.find h k with
+          | v -> Hashtbl.replace h k (v+i)
+          | exception Not_found -> Hashtbl.add h k i)
+        ) lines;
+        Hashtbl.iter (fun k _v -> Printf.printf "%s\n" k) h
     | `Loc ->
         Lwt_list.map_s (fun dir -> main dir >|= fun r -> dir, r) dirs >>= fun l ->
         let r = Irmin_analysis.combine_with_times (fun acc loc -> acc+loc) 0 l in
@@ -110,7 +119,7 @@ let git_dir =
 
 let mode =
   let doc = "Which analysis to run" in
-  let choices = ["scan",`Scan; "loc",`Loc; "commit", `Commit; "contrib", `Contrib] in
+  let choices = ["scan",`Scan; "loc",`Loc; "commit", `Commit; "contrib", `Contrib; "filename", `Files] in
   Arg.(value & pos 0 (enum choices) `Scan & info [] ~docv:"MODE" ~doc)
 
 let main () =

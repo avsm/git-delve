@@ -23,8 +23,6 @@ let num_lines =
   String.Sub.cuts ~sep:nl buf |>
   List.length
 
-let t = Date_range.t
-
 let count_lines_in_store t =
   let lines = ref 0 in
   Store.iter t (fun _k v ->
@@ -47,6 +45,21 @@ let map_repo fn root =
     Store.of_commit_id Irmin.Task.none commit repo >>= fun store ->
     fn store task commit
   ) commits
+
+let repo_filenames root =
+  let rec basename = function [tl] -> tl | _::tl -> basename tl | [] -> "" in
+  let names = Hashtbl.create 1 in
+  Printf.eprintf "Processing: %s\n%!" root;
+  map_repo (fun store task commit ->
+    Store.iter (store ()) (fun k _ ->
+      let k = basename k in
+      (match Hashtbl.find names k with
+      | v -> Hashtbl.replace names k (v+1)
+      | exception Not_found -> Hashtbl.add names k 1);
+      Lwt.return_unit
+    )
+  ) root >>= fun _ ->
+  Lwt.return names
 
 let count_repo_loc root =
   map_repo (fun store task commit ->

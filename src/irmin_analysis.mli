@@ -14,9 +14,9 @@ val repo_commits_for_range :
   start_year:int -> start_month:int -> end_year:int -> end_month:int ->
   string -> (Ptime.t * int) list Lwt.t
 
-val repo_commits :
-  string ->
-  (string * string * Ptime.t) list Lwt.t
+val repo_commits : string -> (string * string * Ptime.t) list Lwt.t
+
+val repo_filenames : string -> (string, int) Hashtbl.t Lwt.t
 
 val repo_contribs_for_range :
   start_year:int -> start_month:int -> end_year:int -> end_month:int ->
