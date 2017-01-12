@@ -9,10 +9,6 @@ open Astring
 
 module Store = Irmin_unix.Irmin_git.FS(Irmin.Contents.String)(Irmin.Ref.String)(Irmin.Hash.SHA1)
 module Sync = Irmin.Sync(Store)
-(*
-module Mem_Store = Irmin_unix.Irmin_git.Memory(Irmin.Contents.String)(Irmin.Ref.String)(Irmin.Hash.SHA1)
-module Mem_sync = Irmin.Sync(Mem_Store)
-*)
 module Topological = Graph.Topological.Make(Store.History)
 
 let src = Logs.Src.create "logs" ~doc:"Logs"
@@ -42,15 +38,6 @@ let map_repo fn root =
   Irmin_git.config ~root ~bare:false () |> fun config ->
   Store.Repo.create config >>= fun cfg ->
   Store.master task cfg >>= fun tt ->
-(*
-  let disk_store = Irmin.remote_store (module Store) (tt "remote") in
-  Mem_Store.Repo.create config >>= fun mem_cfg ->
-  Mem_Store.master task mem_cfg >>= fun mem_tt ->
-  let mem_store = Irmin.remote_store (module Mem_Store) (mem_tt "remote") in
-  prerr_endline "starting pull";
-  Mem_sync.pull (mem_tt "pull") disk_store `Update >>= fun _ ->
-  prerr_endline "starting done pull";
-*)
   Store.of_branch_id task "master" cfg >>= fun t ->
   Store.history (t "history") >>= fun history ->
   let commits = Topological.fold (fun b acc -> b :: acc) history [] in
@@ -81,10 +68,9 @@ let repo_loc_for_range ~start_year ~start_month ~end_year ~end_month root =
   Printf.eprintf "%d commits\n%!" (Date_range.NearestTime.cardinal t);
   let range = Date_range.t ~start_year ~start_month ~end_year ~end_month in
   List.map (fun d -> 
-    try
-      let _,v = Date_range.NearestTime.find_last_updated d t in
-      d,v
-    with Not_found -> d,0
+    match Date_range.NearestTime.find_last_updated d t with
+    | _, v -> d,v
+    | exception Not_found -> d,0
   ) range
 
 let owners = Hashtbl.create 1
