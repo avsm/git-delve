@@ -1,13 +1,14 @@
 #!/bin/sh -ex
 
-docker build -t local-build .
+docker pull avsm/git-delve
 eval `ssh-agent -s`
 chmod 600 deploy_git_delve
 ssh-add deploy_git_delve
 mkdir html
 for i in contribs.pdf commits.pdf loc.pdf files.txt; do
-  docker run local-build cat /home/opam/src/scripts/$i > html/$i
+  docker run avsm/git-delve cat /home/opam/src/scripts/$i > html/$i
 done
+cp index.html html/
 cd html
 git init
 git checkout -b gh-pages
