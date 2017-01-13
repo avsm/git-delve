@@ -159,6 +159,23 @@ let classify repo =
   |"owl" -> Tool
   |"vpnkit" -> Protocol
   |"webbrowser" -> Web
+  |"mirage-vnetif" -> Driver
+  |"functoria" -> Core
+  |"mirage-net-unix" -> Driver
+  |"mirage-net-xen" -> Driver
+  |"mirage-stdlib-random" -> Driver
+  |"mirage-qubes" -> Driver
+  |"ocaml-hvsock" -> Protocol
+  |"randomconv" -> Core
+  |"mirage-os-shim" -> Tool
+  |"mirage-platform" -> Core
+  |"ocaml-vchan" -> Protocol 
+  |"mirage-solo5" -> Driver
+  |"charrua-core" -> Protocol
+  |"solo5" -> "Driver"
+  |"ocaml-9p" -> Protocol
+  |"mirage-bootvar-solo5" -> Core
+  |"imaplet-lwt" -> Protocol
   |x -> Unknown x
 
 let t x = classify x
