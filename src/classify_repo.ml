@@ -172,7 +172,7 @@ let classify repo =
   |"ocaml-vchan" -> Protocol 
   |"mirage-solo5" -> Driver
   |"charrua-core" -> Protocol
-  |"solo5" -> "Driver"
+  |"solo5" -> Driver
   |"ocaml-9p" -> Protocol
   |"mirage-bootvar-solo5" -> Core
   |"imaplet-lwt" -> Protocol
