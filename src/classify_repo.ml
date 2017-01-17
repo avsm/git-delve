@@ -68,6 +68,7 @@ let classify repo =
   |"ezjsonm" -> Web
   |"mirage-fs-unix" -> Driver
   |"ocaml-github" -> Web
+  |"ocaml-git" -> Protocol
   |"omd" -> Web
   |"ezxmlm" -> Web
   |"mirage-tcpip" -> Protocol
@@ -95,11 +96,13 @@ let classify repo =
   |"ocaml-qmp" -> Tool
   |"tls" -> Sec
   |"mirage-block-ramdisk" -> Driver
+  |"mirage-block-unix" -> Driver
   |"ocaml-asn1-combinators" -> Sec
   |"ocaml-rpc" -> Protocol
   |"travis-senv" -> Tool
   |"mirage-block-solo5" -> Driver
   |"ocaml-cohttp" -> Web
+  |"mirage-http" -> Web
   |"ocaml-sodium" -> Sec
   |"vhd-tool" -> Storage
   |"mirage-block-xen" -> Driver
@@ -176,6 +179,7 @@ let classify repo =
   |"ocaml-9p" -> Protocol
   |"mirage-bootvar-solo5" -> Core
   |"imaplet-lwt" -> Protocol
+  |"mirage-net-macosx" -> Driver
   |x -> Unknown x
 
 let t x = classify x
