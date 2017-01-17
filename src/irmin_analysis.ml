@@ -25,9 +25,12 @@ let num_lines =
 
 let count_lines_in_store t =
   let lines = ref 0 in
-  Store.iter t (fun _k v ->
-    v () >|= fun v ->
-    lines := !lines + (num_lines v)
+  Store.iter t (fun k v ->
+    let k = Fpath.v (String.concat ~sep:"/" k) in
+    if Classify_file.filter k then begin
+      v () >|= fun v ->
+      lines := !lines + (num_lines v)
+    end else Lwt.return_unit
   ) >>= fun () ->
   Lwt.return !lines
 
