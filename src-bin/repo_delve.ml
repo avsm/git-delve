@@ -10,8 +10,8 @@ open Astring
 let with_range fn v =
   let start_month = 1 in
   let start_year = 2013 in
-  let end_month = 12 in
-  let end_year = 2016 in
+  let end_month = 1 in
+  let end_year = 2017 in
   fn ~start_year ~start_month ~end_year ~end_month v
 
 let main = with_range Irmin_analysis.repo_loc_for_range
