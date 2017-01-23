@@ -9,6 +9,7 @@
 let filter f =
   let _, ext = Fpath.split_ext f in
   match ext with
+  |".ml"
   |".mli"
   |".c"
   |".cpp"
